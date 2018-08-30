@@ -105,3 +105,4 @@ venv.bak/
 token_val.txt
 google_key.txt
 test_long_lats.txt
+*.zip
