@@ -104,3 +104,4 @@ venv.bak/
 .mypy_cache/
 token_val.txt
 google_key.txt
+test_long_lats.txt
