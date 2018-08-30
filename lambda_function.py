@@ -59,22 +59,30 @@ def getUberInfo(longitude, latitude):
 	response = requests.get('https://api.uber.com/v1.2/estimates/time', headers=headers, params=params)
 	return response.json()
 
+def returnSpeech(speech, endSession=True):
+	return {
+		"version": "1.0",
+		"sessionAttributes": {},
+		"response": {
+		"outputSpeech": {
+		"type": "PlainText",
+		"text": speech
+			},
+			"shouldEndSession": endSession
+		  }
+		}
+
 def lambda_handler(event, context):
 	if event["request"]["type"] == "LaunchRequest":
-		return on_launch(event["request"], event["session"])
-
-	elif event["request"]["type"] == "IntentRequest":
-		locationInfo = alexaHelper.extractLatLong(event, context)
-		return on_intent(event["request"], event["session"], locationInfo=locationInfo)
-	else:
-		handle_session_end_request()
+		location = extractLatLong(event, context)
+		response = ["{} Will be here in {} Minutes".format(val['type'], val['time']) for val in extract_info(location['longitude'], location['latitude'])]
+		return returnSpeech('.  and '.join(response))
 
 
 
 if __name__ == '__main__':
 	long_lats = [v.split(',') for v in open("test_long_lats.txt").read().split("\n") if len(v) > 0]
 	for lng, lat in long_lats:
-		for val in extract_info(lng, lat):
-			print("{} Will be here in {} Minutes".format(val['type'], val['time']))
-
+		response = ["{} Will be here in {} Minutes".format(val['type'], val['time']) for val in extract_info(lng, lat)]
+		print ' '.join(response)
 
