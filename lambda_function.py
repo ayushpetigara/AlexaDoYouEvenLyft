@@ -1,6 +1,6 @@
 import requests
 from geopy.geocoders import GoogleV3
-
+import random
 
 
 try:
@@ -15,6 +15,8 @@ except:
 
 geolocator = GoogleV3(api_key=GOOGLE_KEY)
 # Allows you to convert device location to Long/Lat
+
+OPTIONS = ["A little more than", "approximately", "a little less than"]
 
 headers = {
     'Authorization': 'Token {}'.format(TOKEN_VAL),
@@ -75,10 +77,15 @@ def returnSpeech(speech, endSession=True):
 def lambda_handler(event, context):
 	if event["request"]["type"] == "LaunchRequest":
 		location = extractLatLong(event, context)
-		response = ["{} Will be here in {} Minutes".format(val['type'], val['time']) for val in extract_info(location['longitude'], location['latitude'])]
-		return returnSpeech('.  and '.join(response))
-
-
+		response = ""
+		all_info = extract_info(location['Longitude'], location['Latitude'])
+		all_responses = []
+		for i, results in enumerate(all_info):
+			time_val = results['time']
+			car_type = results['type'].lower().replace("uber", "oober ")
+			all_responses.append("There is an {} driver {} {} Minutes from your location".format(car_type, random.choice(OPTIONS), time_val))
+		message = ".  If you would like to book a ride please download the oober app on your smartphone."
+		return returnSpeech('. and '.join(all_responses) + message)
 
 if __name__ == '__main__':
 	long_lats = [v.split(',') for v in open("test_long_lats.txt").read().split("\n") if len(v) > 0]
