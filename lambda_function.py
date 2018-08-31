@@ -44,6 +44,23 @@ def extractLatLong(event, context):
 	res = requests.get(url, headers=headers).json()
 	return convertLatLong(res["addressLine1"] + " " + res["city"] + " " + res['stateOrRegion'])
 
+def getAddress(event, context):
+	try:
+		deviceID = event["context"]["System"]['device']['deviceId']
+	except:
+		deviceID = "Test"
+	try:
+		key = event["context"]["System"]['apiAccessToken']
+	except:
+		key = ""
+		deviceID = "Test"
+	# This returns a dictionary object
+	headers = {'Host': 'api.amazonalexa.com', 'Accept': 'application/json', 'Authorization': "Bearer {}".format(key)}
+	url = 'https://api.amazonalexa.com/v1/devices/{}/settings/address'.format(deviceID)
+	res = requests.get(url, headers=headers).json()
+	return res["addressLine1"] + " " + res["city"] + " " + res['stateOrRegion']
+
+
 def extract_info(longitude, latitude):
 	information = []
 	jsonVal = getUberInfo(longitude, latitude)
@@ -61,7 +78,7 @@ def getUberInfo(longitude, latitude):
 	response = requests.get('https://api.uber.com/v1.2/estimates/time', headers=headers, params=params)
 	return response.json()
 
-def returnSpeech(speech, endSession=True):
+def returnSpeech(speech, endSession=True, text="", title=""):
 	return {
 		"version": "1.0",
 		"sessionAttributes": {},
@@ -70,6 +87,27 @@ def returnSpeech(speech, endSession=True):
 		"type": "PlainText",
 		"text": speech
 			},
+			"directives": [{
+                "type": "Display.RenderTemplate",
+                "template": {
+                    "type": "BodyTemplate1",
+                    "token": "T123",
+                    "backButton": "HIDDEN",
+                    "backgroundImage": {
+                        "contentDescription": "Uber Logo",
+                        "sources": [{
+                            "url": "https://s3.amazonaws.com/christopherlambert/uber-logo.png"
+                        }]
+                    },
+                    "title": title,
+                    "textContent": {
+                        "primaryText": {
+                            "text": text,
+                            "type": "PlainText"
+                        }
+                    }
+                }
+            }],
 			"shouldEndSession": endSession
 		  }
 		}
@@ -92,4 +130,3 @@ if __name__ == '__main__':
 	for lng, lat in long_lats:
 		response = ["{} Will be here in {} Minutes".format(val['type'], val['time']) for val in extract_info(lng, lat)]
 		print ' '.join(response)
-
