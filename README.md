@@ -14,7 +14,3 @@ Alexa skill that returns nearby Uber vehicle response time
 > There is an Uber X driver approximately 8 Minutes from your location, and
 > There is an Uber Pool driver approximately 12 Minutes from your location.
 > If you would like to book a ride please download the Uber app on your smartphone.
-
-<p align="center">
-  <img height="75%"" src="static/image.jpg"/>
-</p>
