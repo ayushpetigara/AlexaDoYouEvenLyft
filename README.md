@@ -16,5 +16,5 @@ Alexa skill that returns nearby Uber vehicle response time
 > If you would like to book a ride please download the Uber app on your smartphone.
 
 <p align="center">
-  <img height="250px" width="250px" src="static/image.jpg"/>
+  <img height="400px" width="250px" src="static/image.jpg"/>
 </p>
