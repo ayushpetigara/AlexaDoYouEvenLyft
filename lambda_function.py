@@ -126,15 +126,41 @@ def returnSpeech(speech, endSession=True, text="", title=""):
 
 def nearest_uber(longitude, latitude):
 	all_info = extract_uber_info(longitude, latitude)
-	all_responses = []
 	message = ".  If you would like to book a ride please download the oober app on your smartphone."
 	if len(all_info) == 0:
-		return "There are no Uber drivers in your area."
+		return "There are no oober drivers in your area."
 	time_val = all_info[0]['time']
 	car_type = all_info[0]['type'].lower().replace("uber", "oober ")
 	return "There is an {} driver {} {} Minutes from your location".format(car_type, random.choice(OPTIONS), time_val) + message
 
+def nearest_lyft(longitude, latitude):
+	all_info = extract_lyft_info(longitude, latitude)
+	message = message = ".  If you would like to book a ride please download the lyft app on your smartphone."
+	if len(all_info) == 0:
+		return "There are no Lyft drivers in your area."
+	time_val = all_info[0]['time']
+	car_type = all_info[0]['type'].lower()
+	return "There is a {} driver {} {} Minutes from your location".format(car_type, random.choice(OPTIONS), time_val) + message
 
+
+def getLyftInfo(longitude, latitude):
+	params = (
+    ('lat', latitude),
+    ('lng', longitude),
+	)
+	response = requests.get('https://api.lyft.com/v1/eta', headers=lyftHeaders, params=params)
+	return response.json()
+
+def extract_lyft_info(longitude, latitude):
+	information = []
+	jsonVal = getLyftInfo(longitude, latitude)
+	times = jsonVal['eta_estimates']
+	for val in times:
+		if val['eta_seconds'] != None:
+			arrival_time = val['eta_seconds'] / 60
+			vehicle_type = val['display_name']
+			information.append({"type": vehicle_type, "time": arrival_time})
+	return information
 
 def on_intent(intent_request, session, event, context):
 	# This means the person asked the skill to do an action
