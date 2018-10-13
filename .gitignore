@@ -103,6 +103,8 @@ venv.bak/
 # mypy
 .mypy_cache/
 token_val.txt
+lyft_token_val.txt
+uber_token_val.txt
 google_key.txt
 test_long_lats.txt
 *.zip
