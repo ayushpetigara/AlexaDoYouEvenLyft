@@ -112,9 +112,31 @@ def returnSpeech(speech, endSession=True, text="", title=""):
 		  }
 		}
 
+def nearest_uber(longitude, latitude):
+	all_info = extract_info(longitude, latitude)
+	all_responses = []
+	message = ".  If you would like to book a ride please download the oober app on your smartphone."
+	if len(all_info) == 0:
+		return "There are no Uber drivers in your area."
+	time_val = all_info[0]['time']
+	car_type = all_info[0]['type'].lower().replace("uber", "oober ")
+	return "There is an {} driver {} {} Minutes from your location".format(car_type, random.choice(OPTIONS), time_val) + message
+
+
+
+def on_intent(intent_request, session, event, context):
+	# This means the person asked the skill to do an action
+	intent_name = intent_request["intent"]["name"]
+	# This is the name of the intent (Defined in the Alexa Skill Kit)
+	if intent_name == 'nearestUber':
+		# nearestUber intent
+		location = extractLatLong(event, context)
+		# Current location
+		return nearest_uber(location['Longitude'], location['Latitude'])
+		# Return the response for what day
+
 def lambda_handler(event, context):
 	if event["request"]["type"] == "LaunchRequest":
-		location = extractLatLong(event, context)
 		response = ""
 		all_info = extract_info(location['Longitude'], location['Latitude'])
 		all_responses = []
@@ -128,5 +150,4 @@ def lambda_handler(event, context):
 if __name__ == '__main__':
 	long_lats = [v.split(',') for v in open("test_long_lats.txt").read().split("\n") if len(v) > 0]
 	for lng, lat in long_lats:
-		response = ["{} Will be here in {} Minutes".format(val['type'], val['time']) for val in extract_info(lng, lat)]
-		print ' '.join(response)
+		print nearest_uber(lng, lat)
