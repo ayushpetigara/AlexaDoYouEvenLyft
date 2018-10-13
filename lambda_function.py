@@ -4,9 +4,14 @@ import random
 
 
 try:
-	TOKEN_VAL = open("token_val.txt").read().strip()
+	UBER_TOKEN_VAL = open("uber_token_val.txt").read().strip()
 except:
-	TOKEN_VAL = raw_input("Token Val: ")
+	UBER_TOKEN_VAL = raw_input("Uber Token Val: ")
+
+try:
+	LYFT_TOKEN_VAL = open("lyft_token_val.txt").read().strip()
+except:
+	LYFT_TOKEN_VAL = raw_input("Lyft Token Val: ")
 
 try:
 	GOOGLE_KEY = open("google_key.txt").read().strip()
@@ -18,11 +23,18 @@ geolocator = GoogleV3(api_key=GOOGLE_KEY)
 
 OPTIONS = ["A little more than", "approximately", "a little less than"]
 
-headers = {
-    'Authorization': 'Token {}'.format(TOKEN_VAL),
+uberHeaders = {
+    'Authorization': 'Token {}'.format(UBER_TOKEN_VAL),
     'Accept-Language': 'en_US',
     'Content-Type': 'application/json',
 }
+
+lyftHeaders = {
+    'Authorization': 'Bearer {}'.format(LYFT_TOKEN_VAL),
+    'Accept-Language': 'en_US',
+    'Content-Type': 'application/json',
+}
+
 
 def convertLatLong(address):
 	a = geolocator.geocode(address)
@@ -61,7 +73,7 @@ def getAddress(event, context):
 	return res["addressLine1"] + " " + res["city"] + " " + res['stateOrRegion']
 
 
-def extract_info(longitude, latitude):
+def extract_uber_info(longitude, latitude):
 	information = []
 	jsonVal = getUberInfo(longitude, latitude)
 	for val in jsonVal['times']:
@@ -75,7 +87,7 @@ def getUberInfo(longitude, latitude):
     ('start_latitude', latitude),
     ('start_longitude', longitude),
 	)
-	response = requests.get('https://api.uber.com/v1.2/estimates/time', headers=headers, params=params)
+	response = requests.get('https://api.uber.com/v1.2/estimates/time', headers=uberHeaders, params=params)
 	return response.json()
 
 def returnSpeech(speech, endSession=True, text="", title=""):
@@ -113,7 +125,7 @@ def returnSpeech(speech, endSession=True, text="", title=""):
 		}
 
 def nearest_uber(longitude, latitude):
-	all_info = extract_info(longitude, latitude)
+	all_info = extract_uber_info(longitude, latitude)
 	all_responses = []
 	message = ".  If you would like to book a ride please download the oober app on your smartphone."
 	if len(all_info) == 0:
@@ -134,11 +146,17 @@ def on_intent(intent_request, session, event, context):
 		# Current location
 		return nearest_uber(location['Longitude'], location['Latitude'])
 		# Return the response for what day
+	elif intent_name == 'nearestLyft':
+		# nearestUber intent
+		location = extractLatLong(event, context)
+		# Current location
+		return nearest_uber(location['Longitude'], location['Latitude'])
+		# Return the response for what day
 
 def lambda_handler(event, context):
 	if event["request"]["type"] == "LaunchRequest":
 		response = ""
-		all_info = extract_info(location['Longitude'], location['Latitude'])
+		all_info = extract_uber_info(location['Longitude'], location['Latitude'])
 		all_responses = []
 		for i, results in enumerate(all_info):
 			time_val = results['time']
