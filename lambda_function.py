@@ -142,7 +142,6 @@ def nearest_lyft(longitude, latitude):
 	car_type = all_info[0]['type'].lower()
 	return "There is a {} driver {} {} Minutes from your location".format(car_type, random.choice(OPTIONS), time_val) + message
 
-
 def getLyftInfo(longitude, latitude):
 	params = (
     ('lat', latitude),
